@@ -5,7 +5,8 @@ import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
+type SFSymbolName = Extract<SymbolViewProps['name'], string>;
+type IconMapping = Record<SFSymbolName, ComponentProps<typeof MaterialIcons>['name']>;
 type IconSymbolName = keyof typeof MAPPING;
 
 /**
@@ -18,6 +19,10 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'briefcase.fill': 'work',
+  'person.fill': 'person',
+  'doc.text.fill': 'description',
+  'list.clipboard.fill': 'assignment',
 } as IconMapping;
 
 /**

@@ -1,28 +1,24 @@
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { Redirect } from 'expo-router';
 import { ActivityIndicator, StyleSheet } from 'react-native';
 
 export default function Index() {
-  const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { isLoading, user } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (user) {
-        router.replace('/(tabs)');
-      } else {
-        router.replace('/login');
-      }
-    }
-  }, [isLoading, user]);
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <ActivityIndicator size="large" color="#0a7ea4" />
+      </ThemedView>
+    );
+  }
 
-  return (
-    <ThemedView style={styles.container}>
-      <ActivityIndicator size="large" color="#0a7ea4" />
-    </ThemedView>
-  );
+  if (user) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  return <Redirect href="/login" />;
 }
 
 const styles = StyleSheet.create({

@@ -22,7 +22,7 @@ import {
 const STEPS = [
   'Personal Info',
   'Employment',
-  'Skills',
+  'Profiling Skills',
   'Licenses',
   'Other',
   'Review',
@@ -124,7 +124,7 @@ const OPOL_BARANGAYS: Barangay[] = [
 
 export default function PesoRegistrationScreen() {
   const router = useRouter();
-  const { token } = useAuth();
+  const { token, refreshProfile } = useAuth();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -232,6 +232,11 @@ export default function PesoRegistrationScreen() {
   const prevStep = () => setStep(s => Math.max(s - 1, 0));
 
   const submitForm = async () => {
+    if (!token) {
+      Alert.alert('Error', 'You must be logged in to submit registration');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Calculate age to ensure it's always a valid integer
@@ -260,7 +265,14 @@ export default function PesoRegistrationScreen() {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const rawText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        console.error('[PESO Registration] Non-JSON response:', rawText.substring(0, 300));
+        throw new Error('Server returned HTML instead of JSON. The API endpoint may not exist or the server is down.');
+      }
       console.log('[PESO Registration] Response:', response.status, data);
       
       if (!response.ok) {
@@ -275,6 +287,7 @@ export default function PesoRegistrationScreen() {
       }
 
       console.log('[PESO Registration] Success - registration completed');
+      await refreshProfile();
       Alert.alert('Success', 'PESO registration submitted successfully!', [
         { text: 'OK', onPress: () => router.replace('/(tabs)') },
       ]);
@@ -384,7 +397,7 @@ export default function PesoRegistrationScreen() {
 
   const renderStep2 = () => (
     <View>
-      <ThemedText type="subtitle" style={styles.stepTitle}>Skills Profile</ThemedText>
+      <ThemedText type="subtitle" style={styles.stepTitle}>Profiling Skills</ThemedText>
       <ThemedText style={styles.helper}>Select all that apply</ThemedText>
       {SKILL_OPTIONS.map(skill => (
         <TouchableOpacity
